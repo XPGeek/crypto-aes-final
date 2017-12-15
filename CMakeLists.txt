@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(M3 CXX)
+project(CRYPTO CXX)
 
 # add any source files you create to this variable
 set(SOURCE_FILES
@@ -25,21 +25,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 COMPONENTS Multimedia Widgets Test REQUIRED)
 
-# build cryto
-add_executable(cyrpto main.cpp ${SOURCE_FILES})
-if(UNIX AND NOT APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-  target_link_libraries(crypto Qt5::Widgets Qt5::Multimedia pthread)
-else(UNIX AND NOT APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-  target_link_libraries(crypto Qt5::Widgets Qt5::Multimedia)
-endif()
+add_executable(crypto main.cpp ${SOURCE_FILES})
+target_link_libraries(crypto Qt5::Widgets)
 
-# build tests
 add_executable(test_crypto test_crypto.cpp ${SOURCE_FILES})
-if(UNIX AND NOT APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-  target_link_libraries(test_crypto Qt5::Widgets Qt5::Multimedia Qt5::Test pthread)
-else(UNIX AND NOT APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-  target_link_libraries(test_crypto Qt5::Widgets Qt5::Multimedia Qt5::Test)
-endif()
+target_link_libraries(test_crypto Qt5::Widgets Qt5::Test)
 
 # setup testing
 enable_testing()

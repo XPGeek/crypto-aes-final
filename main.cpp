@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
-	MIDIPlayer player;
+	Crypto encryptor;
 
-	player.show();
+	encryptor.show();
 	return app.exec();
 }
