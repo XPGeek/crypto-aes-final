@@ -52,20 +52,7 @@ void Crypto::inputpath_slot() {
 
 		while (input_file.get(c))
 		{
-			switch(c)
-			{
-				case '0':
 
-				break;
-			
-				case '1':
-
-				break;
-
-				case '2'
-			}
-			input_vector.push_back(c);
-			std::cout << c << std::endl;
 		}
 
 		input_file.close();
