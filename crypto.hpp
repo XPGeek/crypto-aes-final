@@ -65,14 +65,12 @@ private:
 
 	QGroupBox * keyinputbox;
 	QLineEdit * keyinputpath;
-	QString * keyinputstring;
 	QPushButton * keyinputbrowse;
 
 	void create_text_input();
 
 	QGroupBox * textinputbox;
 	QLineEdit * textinputpath;
-	QString * textinputstring;
 	QPushButton * textinputbrowse;
 
 
@@ -98,7 +96,6 @@ private:
 
 	QGroupBox * outputbox;
 	QLineEdit * outputpath;
-	QString * outputstring;
 	QPushButton * outputbrowse;
 
 	void create_command();

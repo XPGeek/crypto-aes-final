@@ -214,22 +214,91 @@ void Crypto::CBC_slot()
 
 void Crypto::outputpath_slot()
 {
+	if (!outputpath->text().isEmpty() && !outputpath->text().isNull()) {
+
+		std::string out_file = outputpath->text().toStdString();
+
+		if (checkExt(out_file, ".txt")) { //INVALID INPUT FILE EXTENSION
+			QMessageBox input_ext_error;
+			input_ext_error.setText("The output file had an incorrect extension.");
+			input_ext_error.setWindowTitle("Error - Text File Extension");
+			input_ext_error.exec();
+
+			return;
+		}
+
+		std::ifstream output_file(out_file, std::ios::binary);
+
+		if (!output_file.good()) { //BAD OUTPUT FILE
+			QMessageBox input_file_error;
+			input_file_error.setText("The output file could not be opened.");
+			input_file_error.setWindowTitle("Error - Output File Issue");
+			input_file_error.exec();
+
+			return;
+		}
+
+		output_file.close();
+
+	} else {
+		QMessageBox no_output_file;
+		no_output_file.setText("Please enter a text file name.");
+		no_output_file.setWindowTitle("Error - No Text File");
+		no_output_file.exec();
+
+		return;
+	}
 }
 
 void Crypto::outputbrowse_slot()
 {
+	QString outputstring = QFileDialog::getOpenFileName(this, tr("Open Plaintext"), "", tr("Text Files (*.txt)"));
+	textinputpath->setText(outputstring);
 }
 
 void Crypto::startdencrypt_slot()
 {
 	if (key128->isChecked() && key.size() == 16) {
-		std::cout << "128" << std::endl;
+		if (ECB->isChecked()) {
+			std::cout << "128" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "128" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
 	}
 	else if (key192->isChecked() && key.size() == 24) {
-		std::cout << "192" << std::endl;
+		if (ECB->isChecked()) {
+			std::cout << "192" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "192" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
 	}
 	else if (key256->isChecked() && key.size() == 32) {
-		std::cout << "256" << std::endl;
+		if (ECB->isChecked()) {
+			std::cout << "256" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "256" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
+	}
+	else if (!key128->isChecked() && !key192->isChecked() && !key256->isChecked()) {
+		std::cout << "Check something man!" << std::endl;
 	}
 	else {
 		std::cout << "The inputted key did not match the size" << std::endl;
@@ -238,14 +307,47 @@ void Crypto::startdencrypt_slot()
 
 void Crypto::startencrypt_slot()
 {
-	if (key128->isChecked() && key.size() == 16) {
-		std::cout << "128" << std::endl;
+	if (key128->isChecked() && key.size() == 16) {	
+		if (ECB->isChecked()) {
+			std::cout << "128" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "128" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
 	}
 	else if (key192->isChecked() && key.size() == 24) {
-		std::cout << "192" << std::endl;
+		if (ECB->isChecked()) {
+			std::cout << "192" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "192" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
 	}
 	else if (key256->isChecked() && key.size() == 32) {
-		std::cout << "256" << std::endl;
+		if (ECB->isChecked()) {
+			std::cout << "256" << std::endl;
+			std::cout << "ECB" << std::endl;
+		}
+		else if (CBC->isChecked()) {
+			std::cout << "256" << std::endl;
+			std::cout << "CBC" << std::endl;
+		}
+		else {
+			std::cout << "Check something man!" << std::endl;
+		}
+	}
+	else if (!key128->isChecked() && !key192->isChecked() && !key256->isChecked()) {
+		std::cout << "Check something man!" << std::endl;
 	}
 	else {
 		std::cout << "The inputted key did not match the size" << std::endl;

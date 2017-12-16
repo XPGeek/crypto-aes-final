@@ -1,8 +1,9 @@
 #ifndef DECRYPT_HPP
 #define DECRYPT_HPP
 
+#include <array>
 #include <stdio.h>
-#include <vector>
+
 
 //"You get what you get, and don't throw a fit." -Wyatt 2017
 
@@ -29,9 +30,7 @@ private:
 
   unsigned char key[32];
 
-  std::vector<unsigned int[16]> input_arrays;
-
-  unsigned char current_input[16], current_output[16], state[16];
+  std::array<unsigned char, 16> current_input, current_output, state;
 
 //AES SBOX - Pregenerated using Rijndael's Finite Field, with the final values taken from Wikipedia
 
