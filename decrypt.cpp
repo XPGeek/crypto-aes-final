@@ -1,9 +1,18 @@
 #include "decrypt.hpp"
 
-decrypt::decrypt(int rounds, int words)
+decrypt::decrypt(int rounds, int words, bool mode)
 {
 	num_rounds = rounds;
 	num_words = words;
+	encryption_mode = mode;
+
+	for (int row = 0; row < 4; ++row)
+	{
+		for (int col = 0; col < 4; ++col)
+		{
+			previous_chunk[col][row] = 0x00;
+		}
+	}
 }
 
 void decrypt::read_key(std::vector<unsigned char>& key_in)

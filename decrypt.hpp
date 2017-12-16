@@ -10,7 +10,7 @@
 class decrypt {
 public:
 
-	decrypt(int rounds, int words);
+	decrypt(int rounds, int words, bool mode);
 
 	void read_key(std::vector<unsigned char> & key_in);
 
@@ -35,6 +35,8 @@ private:
 
 	//PRIVATE MEMBERS
 
+	bool encryption_mode;
+
 	int num_rounds;
 	int num_words;
 
@@ -42,6 +44,7 @@ private:
 
 	unsigned char key[32];
 
+	unsigned char previous_chunk[4][4];
 	unsigned char current_chunk[4][4];
 
 	//AES SBOX - Pregenerated using Rijndael's Finite Field, with the final values taken from Wikipedia

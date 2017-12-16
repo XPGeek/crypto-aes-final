@@ -92,7 +92,12 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 	{
 		for (col = 0; col < 4; ++col)
 		{
-			current_chunk[col][row] = current_input[row * 4 + col];
+			if (encryption_mode) { //CBC enabled
+				current_chunk[col][row] = (previous_chunk[col][row] ^ current_input[row * 4 + col]);
+			}
+			else { //EBC enabled
+				current_chunk[col][row] = current_input[row * 4 + col];
+			}
 		}
 	}
 
@@ -119,6 +124,7 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 		for (col = 0; col < 4; ++col)
 		{
 			current_output[row * 4 + col] = current_chunk[col][row];
+			previous_chunk[col][row] = current_chunk[col][row];
 		}
 	}
 
