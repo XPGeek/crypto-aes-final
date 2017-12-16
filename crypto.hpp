@@ -58,8 +58,7 @@ private:
 	//checks the validity of a certain file extension
 	int checkExt(const std::string &filename, const std::string &expected_ext);
 
-	unsigned char char_2_char(char & c, bool msb);
-
+	unsigned char string_2_byte(char & c, bool msb);
 
 	//GUI CREATION FUNCTIONS
 

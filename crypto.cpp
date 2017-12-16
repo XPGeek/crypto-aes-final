@@ -61,13 +61,13 @@ void Crypto::keyinput_slot()
 			current_char = 0;
 
 			//MSB
-			current_char += char_2_char(c, true);
+			current_char += string_2_byte(c, true);
 
 			//next character
 			input_file.get(c);
 
 			//MSB
-			current_char += char_2_char(c, false);
+			current_char += string_2_byte(c, false);
 				
 			//Put it into the vector
 			key.push_back(current_char);
@@ -132,31 +132,32 @@ void Crypto::textinput_slot()
 
 		while (input_file.get(c))
 		{
-			if (index != 16) {
-
-				current_char = 0;
-
-				//MSB
-				current_char += char_2_char(c, true);
-
-				//next character
-				input_file.get(c);
-
-				//MSB
-				current_char += char_2_char(c, false);
-
-				//Put it into the array
-				current_array[index] = current_char;
-
-				std::cout << (int)current_array[index] << std::endl;
-
-				++index;
-			}
-			else {
+			if (index == 16) {
 				std::cout << "END ARRAY______________BEGIN NEW ARRAY" << std::endl;
 				input_arrays.push_back(current_array);
 				index = 0;
 			}
+
+			current_char = 0;
+
+			//MSB
+			current_char += string_2_byte(c, true);
+			std::cout << c << " Round 1: " << (int)current_char << std::endl;
+			
+			//next character
+			input_file.get(c);
+
+			//MSB
+			current_char += string_2_byte(c, false);
+			std::cout << c << " Round 2: " << (int)current_char << std::endl;
+
+			//Put it into the array
+			current_array[index] = current_char;
+
+			std::cout << index << " " << (int)current_array[index] << std::endl;
+
+			++index;
+
 		}
 
 		while (index != 16) {
@@ -258,60 +259,61 @@ void Crypto::outputbrowse_slot()
 
 void Crypto::startdencrypt_slot()
 {
-	if (key128->isChecked() && key.size() == 16) {
+	if (key128->isChecked() && key.size() == 16 || key192->isChecked() && key.size() == 24 || key256->isChecked() && key.size() == 32) {
+		
+		int words = key.size() / 4;
+		int rounds = words + 6;
+		
 		if (ECB->isChecked()) {
-			std::cout << "128" << std::endl;
-			std::cout << "ECB" << std::endl;
+
+			decrypt decryptor(rounds, words);
+
+			decryptor.read_key(key);
+
+			decryptor.key_expansion();
+
+			std::array<unsigned char, 16> current_output;
+
+			std::cout << std::endl << std::endl;
+
+
+			for (int index = 0; index < input_arrays.size(); ++index)
+			{
+				current_output = decryptor.decrypt_block(input_arrays.at(index));
+
+				for (int index = 0; index < current_output.size(); ++index)
+				{
+					std::cout << (int)current_output[index] << " ";
+				}
+
+				std::cout << std::endl << std::endl;
+			}
 		}
 		else if (CBC->isChecked()) {
-			std::cout << "128" << std::endl;
-			std::cout << "CBC" << std::endl;
+
 		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (key192->isChecked() && key.size() == 24) {
-		if (ECB->isChecked()) {
-			std::cout << "192" << std::endl;
-			std::cout << "ECB" << std::endl;
-		}
-		else if (CBC->isChecked()) {
-			std::cout << "192" << std::endl;
-			std::cout << "CBC" << std::endl;
-		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (key256->isChecked() && key.size() == 32) {
-		if (ECB->isChecked()) {
-			std::cout << "256" << std::endl;
-			std::cout << "ECB" << std::endl;
-		}
-		else if (CBC->isChecked()) {
-			std::cout << "256" << std::endl;
-			std::cout << "CBC" << std::endl;
-		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (!key128->isChecked() && !key192->isChecked() && !key256->isChecked()) {
-		std::cout << "Check something man!" << std::endl;
 	}
 	else {
-		std::cout << "The inputted key did not match the size" << std::endl;
+		QMessageBox no_options_selected;
+		no_options_selected.setText("Please check your encryption options. There were either no options selected, or the key provided did not match the size selected.");
+		no_options_selected.setWindowTitle("Error - No Encryption Options Selected");
+		no_options_selected.exec();
+
+		return;
 	}
 }
 
 void Crypto::startencrypt_slot()
 {
-	if (key128->isChecked() && key.size() == 16) {	
+	if (key128->isChecked() && key.size() == 16 || key192->isChecked() && key.size() == 24 || key256->isChecked() && key.size() == 32) {
+
+		int words = key.size() / 4;
+		int rounds = words + 6;
+
 		if (ECB->isChecked()) {
 
-			encrypt encryptor(10, 4);
-			
+			encrypt encryptor(rounds, words, false);
+
 			encryptor.read_key(key);
 
 			encryptor.key_expansion();
@@ -321,59 +323,29 @@ void Crypto::startencrypt_slot()
 			std::cout << std::endl << std::endl;
 
 
-			for (int index = 0; index < input_arrays.size() ; ++index) {
+			for (int index = 0; index < input_arrays.size(); ++index)
+			{
 				current_output = encryptor.encrypt_block(input_arrays.at(index));
 
-				for (int index = 0; index < current_output.size(); ++index) {
+				for (int index = 0; index < current_output.size(); ++index)
+				{
 					std::cout << (int)current_output[index] << " ";
 				}
 
 				std::cout << std::endl << std::endl;
-
 			}
+		}
+		else if (CBC->isChecked()) {
 
-			std::cout << "128" << std::endl;
-			std::cout << "ECB" << std::endl;
 		}
-		else if (CBC->isChecked()) {
-			std::cout << "128" << std::endl;
-			std::cout << "CBC" << std::endl;
-		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (key192->isChecked() && key.size() == 24) {
-		if (ECB->isChecked()) {
-			std::cout << "192" << std::endl;
-			std::cout << "ECB" << std::endl;
-		}
-		else if (CBC->isChecked()) {
-			std::cout << "192" << std::endl;
-			std::cout << "CBC" << std::endl;
-		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (key256->isChecked() && key.size() == 32) {
-		if (ECB->isChecked()) {
-			std::cout << "256" << std::endl;
-			std::cout << "ECB" << std::endl;
-		}
-		else if (CBC->isChecked()) {
-			std::cout << "256" << std::endl;
-			std::cout << "CBC" << std::endl;
-		}
-		else {
-			std::cout << "Check something man!" << std::endl;
-		}
-	}
-	else if (!key128->isChecked() && !key192->isChecked() && !key256->isChecked()) {
-		std::cout << "Check something man!" << std::endl;
 	}
 	else {
-		std::cout << "The inputted key did not match the size" << std::endl;
+		QMessageBox no_options_selected;
+		no_options_selected.setText("Please check your encryption options. There were either no options selected, or the key provided did not match the size selected.");
+		no_options_selected.setWindowTitle("Error - No Encryption Options Selected");
+		no_options_selected.exec();
+
+		return;
 	}
 }
 
@@ -398,7 +370,7 @@ int Crypto::checkExt(const std::string &filename, const std::string &expected_ex
 }
 
 
-unsigned char Crypto::char_2_char(char & c, bool msb)
+unsigned char Crypto::string_2_byte(char & c, bool msb)
 {
 	if (msb) {
 		if (c == '0') {
