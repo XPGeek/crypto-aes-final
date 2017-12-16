@@ -13,7 +13,7 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 
 	int row, col, round = 0;
 
-	//Copy the input PlainText to state array.
+	//load input
 	for (row = 0; row < 4; ++row)
 	{
 		for (col = 0; col < 4; ++col)
@@ -22,12 +22,10 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 		}
 	}
 
-	// Add the First round key to the state before starting the rounds.
+	//Initialize key
 	r_key(0);
 
-	// There will be Nr rounds.
-	// The first Nr-1 rounds are identical.
-	// These Nr-1 rounds are executed in the loop below.
+	//first n-1 rounds are the same
 	for (round = 1; round < num_rounds; ++round)
 	{
 		sub_bytes();
@@ -36,14 +34,12 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 		r_key(round);
 	}
 
-	// The last round is given below.
-	// The MixColumns function is not here in the last round.
+	//the last round doesnt have the mix col
 	sub_bytes();
 	shift_rows();
 	r_key(num_rounds);
 
-	// The encryption process is over.
-	// Copy the state array to output array.
+	//write everthing into the output array
 	for (row = 0; row < 4; ++row)
 	{
 		for (col = 0; col < 4; ++col)
@@ -140,14 +136,14 @@ void encrypt::shift_rows()
 {
 	unsigned char temp;
 
-	// Rotate first row 1 columns to left
+	//1st row rotates 1 column left
 	temp = state[1][0];
 	state[1][0] = state[1][1];
 	state[1][1] = state[1][2];
 	state[1][2] = state[1][3];
 	state[1][3] = temp;
 
-	// Rotate second row 2 columns to left
+	//2nd row rotates 2 columns left
 	temp = state[2][0];
 	state[2][0] = state[2][2];
 	state[2][2] = temp;
@@ -156,7 +152,7 @@ void encrypt::shift_rows()
 	state[2][1] = state[2][3];
 	state[2][3] = temp;
 
-	// Rotate third row 3 columns to left
+	//3rd row rotates 3 columns left
 	temp = state[3][0];
 	state[3][0] = state[3][3];
 	state[3][3] = state[3][2];
@@ -166,29 +162,29 @@ void encrypt::shift_rows()
 
 void encrypt::mix_columns()
 {
-	int row;
-	unsigned char temp, temp_a, temp_b;
 
-	for (row = 0; row < 4; ++row)
+	unsigned char temp_a, temp_b, temp_c;
+
+	for (int row = 0; row < 4; ++row)
 	{
-		temp = state[0][row];
-		temp_a = state[0][row] ^ state[1][row] ^ state[2][row] ^ state[3][row];
+		temp_a = state[0][row];
+		temp_b = state[0][row] ^ state[1][row] ^ state[2][row] ^ state[3][row];
 		
-		temp_b = state[0][row] ^ state[1][row];
-		temp_b = xtime(temp_b);
-		state[0][row] ^= temp_b ^ temp_a;
+		temp_c = state[0][row] ^ state[1][row];
+		temp_c = xtime(temp_c);
+		state[0][row] ^= temp_c ^ temp_b;
 		
-		temp_b = state[1][row] ^ state[2][row];
-		temp_b = xtime(temp_b);
-		state[1][row] ^= temp_b ^ temp_a;
+		temp_c = state[1][row] ^ state[2][row];
+		temp_c = xtime(temp_c);
+		state[1][row] ^= temp_c ^ temp_b;
 		
-		temp_b = state[2][row] ^ state[3][row];
-		temp_b = xtime(temp_b);
-		state[2][row] ^= temp_b ^ temp_a;
+		temp_c = state[2][row] ^ state[3][row];
+		temp_c = xtime(temp_c);
+		state[2][row] ^= temp_c ^ temp_b;
 		
-		temp_b = state[3][row] ^ temp;
-		temp_b = xtime(temp_b);
-		state[3][row] ^= temp_b ^ temp_a;
+		temp_c = state[3][row] ^ temp_a;
+		temp_c = xtime(temp_c);
+		state[3][row] ^= temp_c ^ temp_b;
 	}
 }
 
