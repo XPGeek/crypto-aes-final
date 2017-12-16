@@ -15,6 +15,7 @@
 #include <QString>
 #include <QVBoxLayout>
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -28,8 +29,11 @@ public:
 
 private slots:
 
-	void inputpath_slot();
-	void inputbrowse_slot();
+	void keyinput_slot();
+	void keybrowse_slot();
+
+	void textinput_slot();
+	void textbrowse_slot();
 
 	void key128_slot();
 	void key192_slot();
@@ -51,16 +55,25 @@ private:
 	//checks the validity of a certain file extension
 	int checkExt(const std::string &filename, const std::string &expected_ext);
 
+	unsigned char char_2_char(char & c, bool msb);
+
 
 	//GUI CREATION FUNCTIONS
 
 	//creates the input pane of the GUI
-	void create_input();
+	void create_key_input();
 
-	QGroupBox * inputbox;
-	QLineEdit * inputpath;
-	QString * inputstring;
-	QPushButton * inputbrowse;
+	QGroupBox * keyinputbox;
+	QLineEdit * keyinputpath;
+	QString * keyinputstring;
+	QPushButton * keyinputbrowse;
+
+	void create_text_input();
+
+	QGroupBox * textinputbox;
+	QLineEdit * textinputpath;
+	QString * textinputstring;
+	QPushButton * textinputbrowse;
 
 
 	//creates the key size options pane of the GUI
@@ -96,9 +109,8 @@ private:
 
 	//PRIVATE MEMBERS
 
-	std::vector<unsigned char [16]> input_arrays;
-	std::vector<char> output_vector;
-	
+	std::vector<unsigned char> key;
+	std::vector<std::array<unsigned char, 16>> input_arrays;
 
 };
 

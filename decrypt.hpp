@@ -16,7 +16,7 @@ private:
   //FUNCTIONS
 
   void key_expansion();
-  void r_key();
+  void r_key(int round);
   void invert_bytes();
   void shift_rows();
 
@@ -30,6 +30,8 @@ private:
   unsigned char key[32];
 
   std::vector<unsigned int[16]> input_arrays;
+
+  unsigned char current_input[16], current_output[16], state[16];
 
 //AES SBOX - Pregenerated using Rijndael's Finite Field, with the final values taken from Wikipedia
 
@@ -83,10 +85,6 @@ unsigned char round_constants[11] =
     0x8D, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36
   };
 
-
-
 };
 
 #endif
-
-void KeyExpansion();
