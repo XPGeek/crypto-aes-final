@@ -19,7 +19,7 @@ Crypto::Crypto()
 
 	setLayout(layout);
 
-	setWindowTitle(QString("Encryptor v0.1"));
+	setWindowTitle(QString("Encryptor v0.9"));
 }
 
 void Crypto::keyinput_slot()
@@ -30,8 +30,8 @@ void Crypto::keyinput_slot()
 
 		if (checkExt(in_file, ".txt")) { //INVALID INPUT FILE EXTENSION
 			QMessageBox input_ext_error;
-			input_ext_error.setText("The key file had an incorrect extension.");
-			input_ext_error.setWindowTitle("Error - Key File Extension");
+			input_ext_error.setText("The key file has an incorrect extension.");
+			input_ext_error.setWindowTitle("Error - File Extension");
 			input_ext_error.exec();
 
 			return;
@@ -41,8 +41,8 @@ void Crypto::keyinput_slot()
 
 		if (!input_file.good()) { //BAD INPUT FILE
 			QMessageBox input_file_error;
-			input_file_error.setText("The key file did not exist, or could not be opened.");
-			input_file_error.setWindowTitle("Error - Key File Invalid");
+			input_file_error.setText("The key file could not be opened.");
+			input_file_error.setWindowTitle("Error - File Issue");
 			input_file_error.exec();
 
 			return;
@@ -79,8 +79,8 @@ void Crypto::keyinput_slot()
 
 	} else {
 		QMessageBox no_input_file;
-		no_input_file.setText("Please enter a key file name.");
-		no_input_file.setWindowTitle("Error - No Key File");
+		no_input_file.setText("Please enter a key filename.");
+		no_input_file.setWindowTitle("Error - No File");
 		no_input_file.exec();
 
 		return;
@@ -89,7 +89,7 @@ void Crypto::keyinput_slot()
 
 void Crypto::keybrowse_slot()
 {
-	QString inputstring = QFileDialog::getOpenFileName(this, tr("Open Text"), "", tr("Text Files (*.txt)"));
+	QString inputstring = QFileDialog::getOpenFileName(this, tr("Open Key"), "", tr("Text Files (*.txt)"));
 	keyinputpath->setText(inputstring);
 }
 
@@ -101,8 +101,8 @@ void Crypto::textinput_slot()
 
 		if (checkExt(in_file, ".txt")) { //INVALID INPUT FILE EXTENSION
 			QMessageBox input_ext_error;
-			input_ext_error.setText("The text file had an incorrect extension.");
-			input_ext_error.setWindowTitle("Error - Text File Extension");
+			input_ext_error.setText("The text file has an incorrect extension.");
+			input_ext_error.setWindowTitle("Error - File Extension");
 			input_ext_error.exec();
 
 			return;
@@ -112,8 +112,8 @@ void Crypto::textinput_slot()
 
 		if (!input_file.good()) { //BAD INPUT FILE
 			QMessageBox input_file_error;
-			input_file_error.setText("The text file did not exist, or could not be opened.");
-			input_file_error.setWindowTitle("Error - Text File Invalid");
+			input_file_error.setText("The text file could not be opened.");
+			input_file_error.setWindowTitle("Error - File Inaccessible");
 			input_file_error.exec();
 
 			return;
@@ -133,7 +133,6 @@ void Crypto::textinput_slot()
 		while (input_file.get(c))
 		{
 			if (index == 16) {
-				std::cout << "END ARRAY______________BEGIN NEW ARRAY" << std::endl;
 				input_arrays.push_back(current_array);
 				index = 0;
 			}
@@ -142,19 +141,15 @@ void Crypto::textinput_slot()
 
 			//MSB
 			current_char += string_2_byte(c, true);
-			std::cout << c << " Round 1: " << (int)current_char << std::endl;
-			
+
 			//next character
 			input_file.get(c);
 
 			//MSB
 			current_char += string_2_byte(c, false);
-			std::cout << c << " Round 2: " << (int)current_char << std::endl;
 
 			//Put it into the array
 			current_array[index] = current_char;
-
-			std::cout << index << " " << (int)current_array[index] << std::endl;
 
 			++index;
 
@@ -162,25 +157,18 @@ void Crypto::textinput_slot()
 
 		while (index != 16) {
 			current_array[index] = 0x00;
-			std::cout << (int)current_array[index] << std::endl;
 			++index;
 		}
 
 		input_arrays.push_back(current_array);
 
 		input_file.close();
-
-		std::cout << "We done, we read in: " << input_arrays.size() << "arrays" << std::endl;
 		
-		for (int i = 0; i < input_arrays.size(); ++i) {
-			std::cout << (int)input_arrays.at(i).at(0) << " ";
-		}
-	
 	}
 	else {
 		QMessageBox no_input_file;
-		no_input_file.setText("Please enter a text file name.");
-		no_input_file.setWindowTitle("Error - No Text File");
+		no_input_file.setText("Please enter a text filename.");
+		no_input_file.setWindowTitle("Error - No File");
 		no_input_file.exec();
 
 		return;
@@ -189,28 +177,8 @@ void Crypto::textinput_slot()
 
 void Crypto::textbrowse_slot()
 {
-	QString inputstring = QFileDialog::getOpenFileName(this, tr("Open Plaintext"), "", tr("Text Files (*.txt)"));
+	QString inputstring = QFileDialog::getOpenFileName(this, tr("Open Text"), "", tr("Text Files (*.txt)"));
 	textinputpath->setText(inputstring);
-}
-
-void Crypto::key128_slot()
-{
-}
-
-void Crypto::key192_slot()
-{
-}
-
-void Crypto::key256_slot()
-{
-}
-
-void Crypto::ECB_slot()
-{
-}
-
-void Crypto::CBC_slot()
-{
 }
 
 void Crypto::outputpath_slot()
@@ -221,19 +189,19 @@ void Crypto::outputpath_slot()
 
 		if (checkExt(out_file, ".txt")) { //INVALID INPUT FILE EXTENSION
 			QMessageBox input_ext_error;
-			input_ext_error.setText("The output file had an incorrect extension.");
-			input_ext_error.setWindowTitle("Error - Text File Extension");
+			input_ext_error.setText("The output file has an incorrect extension.");
+			input_ext_error.setWindowTitle("Error - File Extension");
 			input_ext_error.exec();
 
 			return;
 		}
 
-		std::ifstream output_file(out_file, std::ios::binary);
+		std::ofstream output_file(out_file, std::ios::binary);
 
 		if (!output_file.good()) { //BAD OUTPUT FILE
 			QMessageBox input_file_error;
 			input_file_error.setText("The output file could not be opened.");
-			input_file_error.setWindowTitle("Error - Output File Issue");
+			input_file_error.setWindowTitle("Error - File Issue");
 			input_file_error.exec();
 
 			return;
@@ -243,8 +211,8 @@ void Crypto::outputpath_slot()
 
 	} else {
 		QMessageBox no_output_file;
-		no_output_file.setText("Please enter a text file name.");
-		no_output_file.setWindowTitle("Error - No Text File");
+		no_output_file.setText("Please enter an output filename.");
+		no_output_file.setWindowTitle("Error - No File");
 		no_output_file.exec();
 
 		return;
@@ -259,14 +227,45 @@ void Crypto::outputbrowse_slot()
 
 void Crypto::startdencrypt_slot()
 {
+
+	outputpath_slot();
+
 	if (key128->isChecked() && key.size() == 16 || key192->isChecked() && key.size() == 24 || key256->isChecked() && key.size() == 32) {
 		
-		int words = key.size() / 4;
+		int words = (int) key.size() / 4;
 		int rounds = words + 6;
 		
 		if (ECB->isChecked()) {
 
-			decrypt decryptor(rounds, words);
+			decrypt decryptor(rounds, words, false);
+
+			decryptor.read_key(key);
+			decryptor.key_expansion();
+
+			std::string out_file = outputpath->text().toStdString();
+
+			std::ofstream output_file(out_file);
+
+			std::array<unsigned char, 16> current_output;
+
+			for (int index = 0; index < input_arrays.size(); ++index)
+			{
+				current_output = decryptor.decrypt_block(input_arrays.at(index));
+
+				for (int index = 0; index < current_output.size(); ++index)
+				{
+					output_file << std::hex << (int)current_output[index];
+				}
+			}
+
+			output_file.close();
+
+			return;
+
+		}
+		else if (CBC->isChecked()) {
+
+			decrypt decryptor(rounds, words, true);
 
 			decryptor.read_key(key);
 
@@ -283,20 +282,18 @@ void Crypto::startdencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << (int)current_output[index] << " ";
+					std::cout << std::hex << (int)current_output[index] << " ";
 				}
 
 				std::cout << std::endl << std::endl;
 			}
-		}
-		else if (CBC->isChecked()) {
 
 		}
 	}
 	else {
 		QMessageBox no_options_selected;
-		no_options_selected.setText("Please check your encryption options. There were either no options selected, or the key provided did not match the size selected.");
-		no_options_selected.setWindowTitle("Error - No Encryption Options Selected");
+		no_options_selected.setText("Please check your encryption options.\nThere were either no options selected,\nor the key provided did not match the size selected.");
+		no_options_selected.setWindowTitle("Error - Encryption Options");
 		no_options_selected.exec();
 
 		return;
@@ -327,7 +324,7 @@ void Crypto::startencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << (int)current_output[index] << " ";
+					std::cout << std::hex <<(int)current_output[index] << " ";
 				}
 
 				std::cout << std::endl << std::endl;
@@ -353,7 +350,7 @@ void Crypto::startencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << (int)current_output[index] << " ";
+					std::cout << std::hex << (int)current_output[index] << " ";
 				}
 
 				std::cout << std::endl << std::endl;
@@ -363,7 +360,7 @@ void Crypto::startencrypt_slot()
 	else {
 		QMessageBox no_options_selected;
 		no_options_selected.setText("Please check your encryption options. There were either no options selected, or the key provided did not match the size selected.");
-		no_options_selected.setWindowTitle("Error - No Encryption Options Selected");
+		no_options_selected.setWindowTitle("Error - Encryption Options");
 		no_options_selected.exec();
 
 		return;
@@ -502,7 +499,7 @@ unsigned char Crypto::string_2_byte(char & c, bool msb)
 void Crypto::create_key_input()
 {
 
-	keyinputbox = new QGroupBox(tr("Key:"));
+	keyinputbox = new QGroupBox(tr("Key File:"));
 
 	QGridLayout * layout = new QGridLayout;
 
@@ -521,7 +518,7 @@ void Crypto::create_key_input()
 void Crypto::create_text_input()
 {
 
-	textinputbox = new QGroupBox(tr("Plaintext:"));
+	textinputbox = new QGroupBox(tr("Text File:"));
 
 	QGridLayout * layout = new QGridLayout;
 
@@ -544,15 +541,12 @@ void Crypto::create_key_options()
 
 	key128 = new QRadioButton(tr("128-bit"));
 	layout->addWidget(key128, 0, 0);
-	connect(key128, SIGNAL(clicked()), this, SLOT(key128_slot()));
 
 	key192 = new QRadioButton(tr("192-bit"));
 	layout->addWidget(key192, 1, 0);
-	connect(key192, SIGNAL(clicked()), this, SLOT(key192_slot()));
 	
 	key256 = new QRadioButton(tr("256-bit"));
 	layout->addWidget(key256, 2, 0);
-	connect(key256, SIGNAL(clicked()), this, SLOT(key256_slot()));
 
 	keyoptionsbox->setLayout(layout);
 }
@@ -564,11 +558,9 @@ void Crypto::create_encryption_options()
 
 	ECB = new QRadioButton(tr("ECB Mode"));
 	layout->addWidget(ECB, 0, 0);
-	connect(ECB, SIGNAL(clicked()), this, SLOT(ECB_slot()));
 
 	CBC = new QRadioButton(tr("CBC Mode"));
 	layout->addWidget(CBC, 1, 0);
-	connect(CBC, SIGNAL(clicked()), this, SLOT(CBC_slot()));
 
 	encryptionoptionsbox->setLayout(layout);
 }

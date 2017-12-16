@@ -118,7 +118,14 @@ std::array<unsigned char, 16> decrypt::decrypt_block(std::array<unsigned char, 1
 	{
 		for (col = 0; col < 4; ++col)
 		{
-			current_output[row * 4 + col] = current_chunk[col][row];
+			if (encryption_mode) {  //CBC enabled
+				current_output[row * 4 + col] = (previous_chunk[col][row] ^ current_chunk[col][row]);
+			}
+			else { //EBC enabled
+				current_output[row * 4 + col] = current_chunk[col][row];
+			}
+
+			previous_chunk[col][row] = current_input[row * 4 + col];
 		}
 	}
 

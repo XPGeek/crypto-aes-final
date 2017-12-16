@@ -38,13 +38,6 @@ private slots:
 	void textinput_slot();
 	void textbrowse_slot();
 
-	void key128_slot();
-	void key192_slot();
-	void key256_slot();
-
-	void ECB_slot();
-	void CBC_slot();
-
 	void outputpath_slot();
 	void outputbrowse_slot();
 
