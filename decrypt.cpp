@@ -9,7 +9,7 @@ decrypt::decrypt(int rounds, int words, bool mode)
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//initializes array for CBC vector
 			previous_chunk[col][row] = 0x00;
 		}
 	}
@@ -17,11 +17,13 @@ decrypt::decrypt(int rounds, int words, bool mode)
 
 void decrypt::read_key(std::vector<unsigned char>& key_in)
 {
+	//reads in the key to private member
 	for (int index = 0; index < key_in.size(); ++index) {
 		key[index] = key_in[index];
 	}
 }
 
+//identical to the encrypt version of this function, expands the base key based on the the key lenght to 44/52/60 words
 void decrypt::key_expansion()
 {
 	int row, col;
@@ -37,16 +39,19 @@ void decrypt::key_expansion()
 		}
 	}
 
+	//based on the number of rounds the key expansion continues
 	while (row < 4 * (num_rounds + 1))
 	{
 		for (col = 0; col < 4; ++col)
-		{
+		{	//see 2D array note above
 			temp[col] = round_key[(row - 1) * 4 + col];
 		}
 
+
+
 		if (row % num_words == 0)
 		{
-			//Rotate Left
+			//simple cyclic permutation of a word: change [a0,a1,a2,a3] to [a1,a2,a3,a0].
 			t = temp[0];
 			temp[0] = temp[1];
 			temp[1] = temp[2];
@@ -59,6 +64,7 @@ void decrypt::key_expansion()
 				temp[index] = s_box[temp[index]];
 			}
 
+			//apply the round constant 
 			temp[0] = temp[0] ^ round_constant[row / num_words];
 		}
 		else if (num_words > 6 && row % num_words == 4)
@@ -99,7 +105,7 @@ std::array<unsigned char, 16> decrypt::decrypt_block(std::array<unsigned char, 1
 	//Initialize key
 	r_key(num_rounds);
 
-	//first n-1 rounds are the same
+	//first n-1 rounds are the same, they complete all of the AES steps, except in reverse order
 	for (round = num_rounds - 1; round > 0; --round)
 	{
 		inv_shift_rows();
@@ -108,12 +114,12 @@ std::array<unsigned char, 16> decrypt::decrypt_block(std::array<unsigned char, 1
 		inv_mix_columns();
 	}
 
-	//the last round doesnt have the mix col
+	//the last round doesnt have the mix col step
 	inv_shift_rows();
 	inv_sub_bytes();
 	r_key(0);
 
-	//write everthing into the output array
+	//we have completed the process and can write everthing into the output array
 	for (row = 0; row < 4; ++row)
 	{
 		for (col = 0; col < 4; ++col)
@@ -137,7 +143,7 @@ void decrypt::r_key(int round)
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//bitwise XOR each word in the current chunk with the expanded key
 			current_chunk[col][row] ^= round_key[round * 16 + 4 * row + col];
 		}
 	}
@@ -148,7 +154,7 @@ void decrypt::inv_sub_bytes()
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//passed the current chunck through the inverse s box
 			current_chunk[row][col] = inv_s_box[current_chunk[row][col]];
 		}
 	}
@@ -157,6 +163,8 @@ void decrypt::inv_sub_bytes()
 void decrypt::inv_shift_rows()
 {
 	unsigned char temp;
+
+	//row 0 remains unchanged
 
 	//1st row rotates 1 column right
 	temp = current_chunk[1][3];
@@ -186,15 +194,17 @@ void decrypt::inv_mix_columns()
 {
 	unsigned char row_a, row_b, row_c, row_d;
 
+	//the four bytes of each column are combined using a linear transformation
+
 	for (int col = 0; col < 4; ++col)
 	{
-
+		//grabs all four rows of the table
 		row_a = current_chunk[0][col];
 		row_b = current_chunk[1][col];
 		row_c = current_chunk[2][col];
 		row_d = current_chunk[3][col];
 
-
+		//each column is multiplied by a polynomial and then placed back in the same position
 		current_chunk[0][col] = poly_mult(row_a, 0x0E) ^ poly_mult(row_b, 0x0B) ^ poly_mult(row_c, 0x0d) ^ poly_mult(row_d, 0x09);
 		current_chunk[1][col] = poly_mult(row_a, 0x09) ^ poly_mult(row_b, 0x0E) ^ poly_mult(row_c, 0x0b) ^ poly_mult(row_d, 0x0d);
 		current_chunk[2][col] = poly_mult(row_a, 0x0D) ^ poly_mult(row_b, 0x09) ^ poly_mult(row_c, 0x0e) ^ poly_mult(row_d, 0x0b);
@@ -213,10 +223,12 @@ unsigned char decrypt::xtime(unsigned char & x)
 
 unsigned char decrypt::poly_mult(unsigned char multiplicand, unsigned char multipliier)
 {
+	//creates intermediate prodcuts multiplication by stacking the xtime operations
 	unsigned char int_product_a = xtime(multiplicand);
 	unsigned char int_product_b = xtime(int_product_a);
 	unsigned char int_product_c = xtime(int_product_b);
 	unsigned char int_product_d = xtime(int_product_c);
 
+	//polynomial multiplication between the multiplicand and multiplier
 	return (((multipliier & 1) * multiplicand) ^ ((multipliier >> 1 & 1) * int_product_a) ^ ((multipliier >> 2 & 1) * int_product_b) ^ ((multipliier >> 3 & 1) * int_product_c) ^ ((multipliier >> 4 & 1) * int_product_d));
 }

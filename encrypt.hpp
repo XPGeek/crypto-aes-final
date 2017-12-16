@@ -34,15 +34,20 @@ private:
 
 	//PRIVATE MEMBERS
 
+	//encryption mode that determines if we are using CBC Mode, ECB Mode,  TRUE is CBC mode, and FALSE is ECB
 	bool encryption_mode;
 
+	//integers that store the number of rounds and words
 	int num_rounds;
 	int num_words;
 
+	//massive array to store the round_key
 	unsigned char round_key[240];
 
+	//array with space for a 16 word key
 	unsigned char key[32];
-	
+
+	//previous and current chunk, the previous chunk is used when CBC is enabled
 	unsigned char previous_chunk[4][4];
 	unsigned char current_chunk[4][4];
 

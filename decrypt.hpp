@@ -10,17 +10,23 @@
 class decrypt {
 public:
 
+	//constructor that defines the number of words, rounds, and encryption mode:
+	//true = CBC mode, false = ECB mode
 	decrypt(int rounds, int words, bool mode);
 
+	//reads the key into the private member
 	void read_key(std::vector<unsigned char> & key_in);
 
+	//expands the provided key into a number of separate round keys
 	void key_expansion();
 
+	//decrypts one block, or 4x4 array of 2 byte values, taking an encrypted block and returning a decrypted block
 	std::array<unsigned char, 16> decrypt_block(std::array<unsigned char, 16> & current_input);
 
 private:
 
 	//LOGIC FUNCTIONS
+
 
 	void r_key(int round);
 	void inv_sub_bytes();
@@ -35,15 +41,20 @@ private:
 
 	//PRIVATE MEMBERS
 
+	//encryption mode that determines if we are using CBC Mode, ECB Mode,  TRUE is CBC mode, and FALSE is ECB
 	bool encryption_mode;
 
+	//integers that store the number of rounds and words
 	int num_rounds;
 	int num_words;
 
+	//massive array to store the round_key
 	unsigned char round_key[240];
 
+	//array with space for a 16 word key
 	unsigned char key[32];
 
+	//previous and current chunk, the previous chunk is used when CBC is enabled
 	unsigned char previous_chunk[4][4];
 	unsigned char current_chunk[4][4];
 

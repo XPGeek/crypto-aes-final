@@ -2,6 +2,7 @@
 
 Crypto::Crypto()
 {
+	//creats all the GUI elements
 	create_key_input();
 	create_text_input();
 	create_key_options();
@@ -9,6 +10,7 @@ Crypto::Crypto()
 	create_output();
 	create_command();
 
+	//inserts all the GUI elements into the widgets
 	QGridLayout * layout = new QGridLayout;
 	layout->addWidget(keyinputbox, 0, 0, 1, 2);
 	layout->addWidget(textinputbox, 1, 0, 1, 2);
@@ -19,7 +21,7 @@ Crypto::Crypto()
 
 	setLayout(layout);
 
-	setWindowTitle(QString("Encryptor v0.9"));
+	setWindowTitle(QString("Encryptor v1.0"));
 }
 
 void Crypto::keyinput_slot()
@@ -48,7 +50,7 @@ void Crypto::keyinput_slot()
 			return;
 		}
 
-		//READ INTO ARRAY
+		//READ INTO KEY ARRAY
 
 		key.clear();
 
@@ -66,13 +68,12 @@ void Crypto::keyinput_slot()
 			//next character
 			input_file.get(c);
 
-			//MSB
+			//LSB
 			current_char += string_2_byte(c, false);
 				
 			//Put it into the vector
 			key.push_back(current_char);
 
-			std::cout << current_char << std::endl;
 		}
 
 		input_file.close();
@@ -145,7 +146,7 @@ void Crypto::textinput_slot()
 			//next character
 			input_file.get(c);
 
-			//MSB
+			//LSB
 			current_char += string_2_byte(c, false);
 
 			//Put it into the array
@@ -254,7 +255,7 @@ void Crypto::startdencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					output_file << std::hex << (int)current_output[index];
+					output_file << std::setfill('0') << std::setw(2) << std::hex << (int)current_output[index];
 				}
 			}
 
@@ -268,13 +269,13 @@ void Crypto::startdencrypt_slot()
 			decrypt decryptor(rounds, words, true);
 
 			decryptor.read_key(key);
-
 			decryptor.key_expansion();
 
+			std::string out_file = outputpath->text().toStdString();
+
+			std::ofstream output_file(out_file);
+
 			std::array<unsigned char, 16> current_output;
-
-			std::cout << std::endl << std::endl;
-
 
 			for (int index = 0; index < input_arrays.size(); ++index)
 			{
@@ -282,11 +283,13 @@ void Crypto::startdencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << std::hex << (int)current_output[index] << " ";
+					output_file << std::setfill('0') << std::setw(2) << std::hex << (int)current_output[index];
 				}
-
-				std::cout << std::endl << std::endl;
 			}
+
+			output_file.close();
+
+			return;
 
 		}
 	}
@@ -304,7 +307,7 @@ void Crypto::startencrypt_slot()
 {
 	if (key128->isChecked() && key.size() == 16 || key192->isChecked() && key.size() == 24 || key256->isChecked() && key.size() == 32) {
 
-		int words = key.size() / 4;
+		int words = (int) key.size() / 4;
 		int rounds = words + 6;
 
 		if (ECB->isChecked()) {
@@ -314,9 +317,11 @@ void Crypto::startencrypt_slot()
 			encryptor.read_key(key);
 			encryptor.key_expansion();
 
-			std::array<unsigned char, 16> current_output;
+			std::string out_file = outputpath->text().toStdString();
 
-			std::cout << std::endl << std::endl;
+			std::ofstream output_file(out_file);
+
+			std::array<unsigned char, 16> current_output;
 
 			for (int index = 0; index < input_arrays.size(); ++index)
 			{
@@ -324,25 +329,27 @@ void Crypto::startencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << std::hex <<(int)current_output[index] << " ";
+					output_file << std::setfill('0') << std::setw(2) << std::hex << (int)current_output[index];
 				}
-
-				std::cout << std::endl << std::endl;
 			}
+
+			output_file.close();
+
+			return;
+
 		}
 		else if (CBC->isChecked()) {
-			std::cout << "bong" << std::endl;
-
+			
 			encrypt encryptor(rounds, words, true);
 
 			encryptor.read_key(key);
-
 			encryptor.key_expansion();
 
+			std::string out_file = outputpath->text().toStdString();
+
+			std::ofstream output_file(out_file);
+
 			std::array<unsigned char, 16> current_output;
-
-			std::cout << std::endl << std::endl;
-
 
 			for (int index = 0; index < input_arrays.size(); ++index)
 			{
@@ -350,11 +357,14 @@ void Crypto::startencrypt_slot()
 
 				for (int index = 0; index < current_output.size(); ++index)
 				{
-					std::cout << std::hex << (int)current_output[index] << " ";
+					output_file << std::setfill('0') << std::setw(2) << std::hex << (int)current_output[index];
 				}
-
-				std::cout << std::endl << std::endl;
 			}
+
+			output_file.close();
+
+			return;
+
 		}
 	}
 	else {

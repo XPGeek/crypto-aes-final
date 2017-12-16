@@ -9,7 +9,7 @@ encrypt::encrypt(int rounds, int words, bool mode)
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//initializes array for CBC vector
 			previous_chunk[col][row] = 0x00;
 		}
 	}
@@ -17,11 +17,13 @@ encrypt::encrypt(int rounds, int words, bool mode)
 
 void encrypt::read_key(std::vector<unsigned char> & key_in)
 {
+	//reads in the key to private member
 	for (int index = 0; index < key_in.size(); ++index) {
 		key[index] = key_in[index];
 	}
 }
 
+//identical to the dencrypt version of this function, expands the base key based on the the key lenght to 44/52/60 words
 void encrypt::key_expansion()
 {
 	int row, col;
@@ -37,16 +39,17 @@ void encrypt::key_expansion()
 		}
 	}
 
+	//based on the number of rounds the key expansion continues
 	while (row < 4 * (num_rounds + 1))
 	{
 		for (col = 0; col < 4; ++col)
-		{
+		{	//see 2D array note above
 			temp[col] = round_key[(row - 1) * 4 + col];
 		}
 
 		if (row % num_words == 0)
 		{
-			//Rotate Left
+			//simple cyclic permutation of a word: change [a0,a1,a2,a3] to [a1,a2,a3,a0].
 			t = temp[0];
 			temp[0] = temp[1];
 			temp[1] = temp[2];
@@ -59,6 +62,7 @@ void encrypt::key_expansion()
 				temp[index] = s_box[temp[index]];
 			}
 
+			//apply the round constant 
 			temp[0] = temp[0] ^ round_constant[row / num_words];
 		}
 		else if (num_words > 6 && row % num_words == 4)
@@ -101,7 +105,7 @@ std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 1
 		}
 	}
 
-	//Initialize key
+	//Initialize key with an initial value fed into the r key function
 	r_key(0);
 
 	//first n-1 rounds are the same
@@ -137,7 +141,7 @@ void encrypt::r_key(int round)
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//bitwise XOR with the round key values
 			current_chunk[col][row] ^= round_key[round * 16 + 4 * row + col];
 		}
 	}
@@ -148,7 +152,7 @@ void encrypt::sub_bytes()
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
-		{
+		{	//sends the current 4x4 chunck to the sbox
 			current_chunk[row][col] = s_box[current_chunk[row][col]];
 		}
 	}
@@ -157,6 +161,8 @@ void encrypt::sub_bytes()
 void encrypt::shift_rows()
 {
 	unsigned char temp;
+
+	//no need to rotate row 0
 
 	//1st row rotates 1 column left
 	temp = current_chunk[1][0];
@@ -193,6 +199,9 @@ void encrypt::mix_columns()
 
 	for (int row = 0; row < 4; ++row)
 	{
+		//implemented based on wikipedia steps
+
+		//the implemented xtime function preforms the product of 02 and 1b
 		temp_a = current_chunk[0][row];
 		temp_b = current_chunk[0][row] ^ current_chunk[1][row] ^ current_chunk[2][row] ^ current_chunk[3][row];
 		
