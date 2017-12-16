@@ -309,6 +309,29 @@ void Crypto::startencrypt_slot()
 {
 	if (key128->isChecked() && key.size() == 16) {	
 		if (ECB->isChecked()) {
+
+			encrypt encryptor(10, 4);
+			
+			encryptor.read_key(key);
+
+			encryptor.key_expansion();
+
+			std::array<unsigned char, 16> current_output;
+
+			std::cout << std::endl << std::endl;
+
+
+			for (int index = 0; index < input_arrays.size() ; ++index) {
+				current_output = encryptor.encrypt_block(input_arrays.at(index));
+
+				for (int index = 0; index < current_output.size(); ++index) {
+					std::cout << (int)current_output[index] << " ";
+				}
+
+				std::cout << std::endl << std::endl;
+
+			}
+
 			std::cout << "128" << std::endl;
 			std::cout << "ECB" << std::endl;
 		}

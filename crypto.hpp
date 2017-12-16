@@ -21,6 +21,9 @@
 #include <string>
 #include <thread>
 
+#include "encrypt.hpp"
+#include "decrypt.hpp"
+
 class Crypto : public QWidget {
 	Q_OBJECT
 public:
