@@ -252,8 +252,8 @@ void Crypto::outputpath_slot()
 
 void Crypto::outputbrowse_slot()
 {
-	QString outputstring = QFileDialog::getOpenFileName(this, tr("Open Plaintext"), "", tr("Text Files (*.txt)"));
-	textinputpath->setText(outputstring);
+	QString outputstring = QFileDialog::getOpenFileName(this, tr("Save Output"), "", tr("Text Files (*.txt)"));
+	outputpath->setText(outputstring);
 }
 
 void Crypto::startdencrypt_slot()
