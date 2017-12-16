@@ -6,49 +6,11 @@ encrypt::encrypt(int rounds, int words)
 	num_words = words;
 }
 
-std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 16> & current_input)
+void encrypt::read_key(std::vector<unsigned char> & key_in)
 {
-
-	std::array<unsigned char, 16> current_output;
-
-	int row, col, round = 0;
-
-	//load input
-	for (row = 0; row < 4; ++row)
-	{
-		for (col = 0; col < 4; ++col)
-		{
-			state[col][row] = current_input[row * 4 + col];
-		}
+	for (int index = 0; index < key_in.size(); ++index) {
+		key[index] = key_in[index];
 	}
-
-	//Initialize key
-	r_key(0);
-
-	//first n-1 rounds are the same
-	for (round = 1; round < num_rounds; ++round)
-	{
-		sub_bytes();
-		shift_rows();
-		mix_columns();
-		r_key(round);
-	}
-
-	//the last round doesnt have the mix col
-	sub_bytes();
-	shift_rows();
-	r_key(num_rounds);
-
-	//write everthing into the output array
-	for (row = 0; row < 4; ++row)
-	{
-		for (col = 0; col < 4; ++col)
-		{
-			current_output[row * 4 + col] = state[col][row];
-		}
-	}
-
-	return current_output;
 }
 
 void encrypt::key_expansion()
@@ -110,13 +72,58 @@ void encrypt::key_expansion()
 	}
 }
 
+std::array<unsigned char, 16> encrypt::encrypt_block(std::array<unsigned char, 16> & current_input)
+{
+	std::array<unsigned char, 16> current_output;
+
+	int row, col, round = 0;
+
+	//load input
+	for (row = 0; row < 4; ++row)
+	{
+		for (col = 0; col < 4; ++col)
+		{
+			current_chunk[col][row] = current_input[row * 4 + col];
+		}
+	}
+
+	//Initialize key
+	r_key(0);
+
+	//first n-1 rounds are the same
+	for (round = 1; round < num_rounds; ++round)
+	{
+		sub_bytes();
+		shift_rows();
+		mix_columns();
+		r_key(round);
+	}
+
+	//the last round doesnt have the mix col
+	sub_bytes();
+	shift_rows();
+	r_key(num_rounds);
+
+	//write everthing into the output array
+	for (row = 0; row < 4; ++row)
+	{
+		for (col = 0; col < 4; ++col)
+		{
+			current_output[row * 4 + col] = current_chunk[col][row];
+		}
+	}
+
+	return current_output;
+}
+
+
 void encrypt::r_key(int round)
 {
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int col = 0; col < 4; ++col)
 		{
-			state[col][row] ^= round_key[round * 16 + 4 * row + col];
+			current_chunk[col][row] ^= round_key[round * 16 + 4 * row + col];
 		}
 	}
 }
@@ -127,7 +134,7 @@ void encrypt::sub_bytes()
 	{
 		for (int col = 0; col < 4; ++col)
 		{
-			state[row][col] = s_box[state[row][col]];
+			current_chunk[row][col] = s_box[current_chunk[row][col]];
 		}
 	}
 }
@@ -137,54 +144,58 @@ void encrypt::shift_rows()
 	unsigned char temp;
 
 	//1st row rotates 1 column left
-	temp = state[1][0];
-	state[1][0] = state[1][1];
-	state[1][1] = state[1][2];
-	state[1][2] = state[1][3];
-	state[1][3] = temp;
+	temp = current_chunk[1][0];
+	current_chunk[1][0] = current_chunk[1][1];
+	current_chunk[1][1] = current_chunk[1][2];
+	current_chunk[1][2] = current_chunk[1][3];
+	current_chunk[1][3] = temp;
 
 	//2nd row rotates 2 columns left
-	temp = state[2][0];
-	state[2][0] = state[2][2];
-	state[2][2] = temp;
+	temp = current_chunk[2][0];
+	current_chunk[2][0] = current_chunk[2][2];
+	current_chunk[2][2] = temp;
 
-	temp = state[2][1];
-	state[2][1] = state[2][3];
-	state[2][3] = temp;
+	temp = current_chunk[2][1];
+	current_chunk[2][1] = current_chunk[2][3];
+	current_chunk[2][3] = temp;
 
 	//3rd row rotates 3 columns left
-	temp = state[3][0];
-	state[3][0] = state[3][3];
-	state[3][3] = state[3][2];
-	state[3][2] = state[3][1];
-	state[3][1] = temp;
+	temp = current_chunk[3][0];
+	current_chunk[3][0] = current_chunk[3][3];
+	current_chunk[3][3] = current_chunk[3][2];
+	current_chunk[3][2] = current_chunk[3][1];
+	current_chunk[3][1] = temp;
 }
 
 void encrypt::mix_columns()
 {
+	//implemented with help of paper here:
+	//http://www.angelfire.com/biz7/atleast/mix_columns.pdf
+	//and our good friend wikipedia:
+	//https://en.wikipedia.org/wiki/Rijndael_MixColumns
 
 	unsigned char temp_a, temp_b, temp_c;
 
 	for (int row = 0; row < 4; ++row)
 	{
-		temp_a = state[0][row];
-		temp_b = state[0][row] ^ state[1][row] ^ state[2][row] ^ state[3][row];
+		temp_a = current_chunk[0][row];
+		temp_b = current_chunk[0][row] ^ current_chunk[1][row] ^ current_chunk[2][row] ^ current_chunk[3][row];
 		
-		temp_c = state[0][row] ^ state[1][row];
+		temp_c = current_chunk[0][row] ^ current_chunk[1][row];
 		temp_c = xtime(temp_c);
-		state[0][row] ^= temp_c ^ temp_b;
+		current_chunk[0][row] ^= temp_c ^ temp_b;
 		
-		temp_c = state[1][row] ^ state[2][row];
+		temp_c = current_chunk[1][row] ^ current_chunk[2][row];
 		temp_c = xtime(temp_c);
-		state[1][row] ^= temp_c ^ temp_b;
+		current_chunk[1][row] ^= temp_c ^ temp_b;
 		
-		temp_c = state[2][row] ^ state[3][row];
+		temp_c = current_chunk[2][row] ^ current_chunk[3][row];
 		temp_c = xtime(temp_c);
-		state[2][row] ^= temp_c ^ temp_b;
+		current_chunk[2][row] ^= temp_c ^ temp_b;
 		
-		temp_c = state[3][row] ^ temp_a;
+		temp_c = current_chunk[3][row] ^ temp_a;
 		temp_c = xtime(temp_c);
-		state[3][row] ^= temp_c ^ temp_b;
+		current_chunk[3][row] ^= temp_c ^ temp_b;
 	}
 }
 
@@ -195,11 +206,4 @@ unsigned char encrypt::xtime(unsigned char & x)
 
 	//we shift out A7, then XOR with 0x1B IF A7 is 1 (A7 AND 1)
 	return ((x << 1) ^ (((x >> 7) & 1) * 0x1B));
-}
-
-void encrypt::read_key(std::vector<unsigned char> & key_in)
-{
-	for (int index = 0; index < key_in.size(); ++index) {
-		key[index] = key_in[index];
-	}
 }

@@ -30,7 +30,7 @@ private:
 	//HELPER FUNCTIONS
 
 	unsigned char xtime(unsigned char & x);
-	unsigned char poly_mult(unsigned char & multiplicand, unsigned char & multipliier);
+	unsigned char poly_mult(unsigned char multiplicand, unsigned char multipliier);
 
 
 	//PRIVATE MEMBERS
@@ -42,7 +42,7 @@ private:
 
 	unsigned char key[32];
 
-	unsigned char state[4][4];
+	unsigned char current_chunk[4][4];
 
 	//AES SBOX - Pregenerated using Rijndael's Finite Field, with the final values taken from Wikipedia
 
@@ -68,7 +68,7 @@ private:
 
 	//Inverse AES SBOX - Pregenerated using Rijndael's Finite Field, with the final values taken from Wikipedia
 
-	unsigned char s_box_inv[256] =
+	unsigned char inv_s_box[256] =
 	{
 		0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
 		0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
